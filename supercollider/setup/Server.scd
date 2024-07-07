@@ -8,6 +8,12 @@
 
 (
 
+// Server.killAll();
+Buffer.freeAll();
+Tdef.removeAll();
+ServerTree.removeAll();
+StageLimiter.deactivate;
+
 //increase number of buffers the server has access to for loading samples
 s.options.numBuffers = 1024 * 16;
 //increase the memory available to the server

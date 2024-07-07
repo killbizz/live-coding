@@ -12,7 +12,7 @@
         "body": [
             "(",
             "~${1:k}[0] = Pbind(",
-            "\t\\instrument,\\bplay,",
+            "\t\\instrument,\\vplay,",
             "\t\\buf,d[\"k\"][0],",
             "\t\\dur,${2:1},",
             "\t\\amp,${3:1}",
@@ -27,13 +27,39 @@
         "body": [
             "(",
             "~${1:h}[0] = Pbind(",
-            "\t\\instrument,\\bplay,",
+            "\t\\instrument,\\vplay,",
             "\t\\buf,d[\"ch\"][0],",
             "\t\\dur,${2:0.5},",
-            "\t\\amp,Pexprand(0.05,0.3)",
+            "\t\\amp,Pexprand(0.35,0.5)",
             ");$0",
             ")"
         ],
         "description": "Simple Hat"
+    },
+    "LpfSaw": {
+        "scope": "supercollider",
+        "prefix": "bpfsaw",
+        "body": [
+            "(",
+            "~${1:bpfsaw}.play; ~${1:bpfsaw}.awake_(false);",
+            "~${1:bpfsaw} = {",
+            "\tvar sig, env;",
+            "\tenv = EnvGen.kr(Env([0,1,1,0],[\\atk.kr(2),\\sus.kr(0),\\rel.kr(3)],[\\c1.kr(1),0,\\c2.kr(-1)]),timeScale:\\ts.kr(1),doneAction:2);",
+            "\tsig = Saw.ar(\\freq.kr(500)*{LFNoise1.kr(0.5,\\detune.kr(0.02)).midiratio}!2);",
+            "\tsig = BPF.ar(",
+            "\t\tsig,",
+            "\t\t{LFNoise1.kr(",
+            "\t\t\tLFNoise1.kr(4).exprange(\\cfhzmin.kr(0.1),\\cfhzmax.kr(0.3))",
+            "\t\t).exprange(\\cfmin.kr(500),\\cfmax.kr(2000))}!2,",
+            "\t\t{LFNoise1.kr(0.1).exprange(\\rqmin.kr(0.1),\\rqmax.kr(0.2))}!2",
+            "\t);",
+            "\tsig = BLowShelf.ar(sig,\\lsf.kr(200),0.5,\\ldb.kr(0));",
+            "\tsig = Balance2.ar(sig[0],sig[1],\\pan.kr(0));",
+            "\tsig = sig*env*\\amp.kr(1);",
+            "\tOut.ar(\\out.kr(0),sig);",
+            "}",
+            ")$0"
+        ],
+        "description": "bpfsaw: an instrument by Eli Fieldsteel"
     }
 }

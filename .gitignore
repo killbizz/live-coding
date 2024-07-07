@@ -2,3 +2,7 @@
 /hydra/node_modules
 # samples
 /supercollider/samples
+/public/images
+/public/videos
+/public/models
+TODO.txt

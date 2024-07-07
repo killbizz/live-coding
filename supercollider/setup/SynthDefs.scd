@@ -21,14 +21,14 @@ rel = release
 pos = position to start playback from 0 to 1
 
 */
-SynthDef(\vplaym,
-	{arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, atk=0.01, rel=1, pos=0;
-		var sig, env;
-		sig = Pan2.ar(PlayBuf.ar(1,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2),pan);
-		env = EnvGen.ar(Env.linen(0.0,rel,0.0,1));
-		sig = sig * env;
-		sig = sig * amp;
-		Out.ar(out,sig);
+SynthDef(\vplaym, {
+	arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, atk=0.01, rel=1, pos=0;
+	var sig, env;
+	sig = Pan2.ar(PlayBuf.ar(1,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2),pan);
+	env = EnvGen.ar(Env.linen(0.0,rel,0.0,1));
+	sig = sig * env;
+	sig = sig * amp;
+	Out.ar(out,sig);
 }).add;
 
 /*
@@ -50,14 +50,14 @@ rel = release
 pos = position to start playback from 0 to 1
 
 */
-SynthDef(\vplay,
-	{arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, atk=0.0, sus=1, rel= 0, pos=0;
-		var sig, env;
-		sig = Pan2.ar(PlayBuf.ar(2,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2),pan);
-		env = EnvGen.ar(Env.linen(atk,sus,rel,1),doneAction:2);
-		sig = sig * env;
-		sig = sig * amp;
-		Out.ar(out,sig);
+SynthDef(\vplay, {
+	arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, atk=0.0, sus=1, rel= 0, pos=0;
+	var sig, env;
+	sig = Pan2.ar(PlayBuf.ar(2,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2),pan);
+	env = EnvGen.ar(Env.linen(atk,sus,rel,1),doneAction:2);
+	sig = sig * env;
+	sig = sig * amp;
+	Out.ar(out,sig);
 }).add;
 
 /*
@@ -77,14 +77,14 @@ rel = release (usually not used, this is only really in case I accidentally play
 
 */
 
-SynthDef(\bplay,
-	{arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, pos = 0, rel=15;
-		var sig,env ;
-		sig = Mix.ar(PlayBuf.ar(2,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2));
-		env = EnvGen.ar(Env.linen(0.0,rel,0),doneAction:2);
-		sig = sig * env;
-		sig = sig * amp;
-		Out.ar(out,Pan2.ar(sig,pan));
+SynthDef(\bplay, {
+	arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, pos = 0, rel = 15;
+	var sig,env ;
+	sig = Mix.ar(PlayBuf.ar(2,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2));
+	env = EnvGen.ar(Env.linen(0.0,rel,0),doneAction:2);
+	sig = sig * env;
+	sig = sig * amp;
+	Out.ar(out,Pan2.ar(sig,pan));
 }).add;
 
 /*
