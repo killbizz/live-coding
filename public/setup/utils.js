@@ -24,7 +24,7 @@ function clearScene(scene) {
 
 // retrieves the entire model, including scenes, animations, cameras, ...
 function getModel(modelFilePath) {
-    loader = new THREE.GLTFLoader();
+    const loader = new THREE.GLTFLoader();
     return new Promise((resolve, reject) => {
         loader.load(
         modelFilePath,
@@ -46,7 +46,7 @@ function getModel(modelFilePath) {
 // retrieves the geometry of the Mesh identified by meshName
 // if meshName is undefined returns the geometry of the first Mesh inside the model
 async function getModelGeometry(modelFilePath, meshName) {
-    loader = new THREE.GLTFLoader();
+    const loader = new THREE.GLTFLoader();
     return new Promise((resolve, reject) => {
         loader.load(
         modelFilePath,
@@ -75,7 +75,7 @@ async function getModelGeometry(modelFilePath, meshName) {
 
 // TODO
 // async function getModelMaterial(modelFilePath, meshName) {
-//     loader = new THREE.GLTFLoader();
+//     const loader = new THREE.GLTFLoader();
 //     console.log(meshName)
 //     return new Promise((resolve, reject) => {
 //         loader.load(
@@ -102,3 +102,29 @@ async function getModelGeometry(modelFilePath, meshName) {
 //         );
 //     });
 // }
+
+// creates and returns a new Hydra instance and texture
+function createHydraTexture(canvasId, isAudioReactive = false) {
+    return new Promise((resolve, reject) => {
+        let canvas = document.createElement('canvas');
+        canvas.id = canvasId;
+        canvas.width = 1920;
+        canvas.height = 1080;
+        canvas.style.display = 'none';
+        document.body.appendChild(canvas);
+        try {
+            const newHydraInstance = new Hydra({
+                canvas,
+                detectAudio: isAudioReactive,
+                enableStreamCapture: false,
+            });
+            const hydraTexture = new THREE.CanvasTexture(canvas);
+            resolve({
+                hydraTexture: hydraTexture,
+                hydraInstance: newHydraInstance
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}

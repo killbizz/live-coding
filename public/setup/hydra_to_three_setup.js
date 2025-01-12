@@ -19,10 +19,8 @@ async function initialize() {
 		camera.updateProjectionMatrix()
 	}
 
-	// Add event listener for window resize
 	window.addEventListener('resize', onWindowResize)
 
-	// Set the resolution of the renderer to 1920x1080
 	const resolutionWidth = 1920
 	const resolutionHeight = 1080
 	renderer.setSize(resolutionWidth, resolutionHeight)
@@ -34,12 +32,11 @@ async function initialize() {
 	controls.dampingFactor = 0.25
 	controls.screenSpacePanning = false
 
-	mainHydraCanvas = document.getElementById("myCanvas")
+	mainHydraCanvas = document.getElementById("main-hydra-canvas")
 	mainHydraCanvas.style.display = 'none'
 	mainHydraTexture = new THREE.CanvasTexture(mainHydraCanvas)
 
-	// Set initial size
 	onWindowResize()
 }
-  
+
 initialize();

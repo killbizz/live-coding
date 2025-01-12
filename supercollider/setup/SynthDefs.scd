@@ -73,19 +73,54 @@ rate = rate of playback (or pitch)
 amp = volume
 pan = stereo panning of sample
 pos = position of playback (usually not used)
-rel = release (usually not used, this is only really in case I accidentally play a sample backwards, and need the synth to free at some point in the future, or schedule very long samples to be played. This is a security measure in case I box my processor.)
+dur = release (usually not used, this is only really in case I accidentally play a sample backwards, and need the synth to free at some point in the future, or schedule very long samples to be played. This is a security measure in case I box my processor.)
 
 */
 
+// TODO: fix losing 1 instance evaluating a Pbind change in a NodeProxy
 SynthDef(\bplay, {
-	arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, pos = 0, rel = 15;
-	var sig,env ;
-	sig = Mix.ar(PlayBuf.ar(2,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:2));
-	env = EnvGen.ar(Env.linen(0.0,rel,0),doneAction:2);
+	arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, pos = 0, dur = 15, gate = 1;
+	var sig, env;
+	sig = Mix.ar(PlayBuf.ar(2,buf,BufRateScale.ir(buf) * rate,1,BufDur.kr(buf)*pos*44100,doneAction:0));
+	env = EnvGen.ar(Env.linen(0.0,dur,0.0), gate, doneAction: 2);
 	sig = sig * env;
 	sig = sig * amp;
 	Out.ar(out,Pan2.ar(sig,pan));
 }).add;
+
+/*
+
+slice: basic player of buffers divided in 16 slices
+
+out = channel out
+buf = buffer index
+rate = rate of playback (or pitch)
+amp = volume
+pan = stereo panning of sample
+pos = position of playback (usually not used)
+sliceNum = numer of the slice in range 0-15
+gate = parameter to stop the envelope before its natural end, useful in NodeProxies
+
+*/
+
+SynthDef(\slice, {
+    arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, sliceNum = 0, gate = 1;
+    var sig, env;
+    sig = PlayBuf.ar(2, buf, BufRateScale.ir(buf) * rate, startPos: BufFrames.kr(buf) * sliceNum / 16);
+    env = EnvGen.ar(Env.linen(0.0, BufDur.kr(buf) / 16 / rate, 0.001), gate, doneAction: Done.freeSelf);
+    sig = sig * env * amp;
+	Out.ar(out,Pan2.ar(sig,pan));
+}).add;
+
+SynthDef(\slicem, {
+    arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, sliceNum = 0, gate = 1;
+    var sig, env;
+    sig = PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate, startPos: BufFrames.kr(buf) * sliceNum / 16);
+    env = EnvGen.ar(Env.linen(0.0, BufDur.kr(buf) / 16 / rate, 0.001), gate, doneAction: Done.freeSelf);
+    sig = sig * env * amp;
+	Out.ar(out,Pan2.ar(sig,pan));
+}).add;
+
 
 /*
 

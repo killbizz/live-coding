@@ -14,6 +14,11 @@ Tdef.removeAll();
 ServerTree.removeAll();
 StageLimiter.deactivate;
 
+// Routing audio to Reaper through CABLE (use ReaRoute to have more channels)
+// s.options.outDevice = "CABLE Input";
+// s.options.numOutputBusChannels = 8;
+// s.reboot { "Server rebooted with new settings.".postln; };
+
 //increase number of buffers the server has access to for loading samples
 s.options.numBuffers = 1024 * 16;
 //increase the memory available to the server
@@ -23,15 +28,7 @@ s.waitForBoot({
     "Starting server setup".postln;
 	//display the oscilloscope
 	// s.scope;
-	//start proxyspace
-	// p = ProxySpace.push(s);
-	// s.sync;
-	//start tempo clock
-	// p.makeTempoClock;
-	//give proxyspace a tempo
-	// p.clock.tempo = 2;
-	//wait for the server to sync
-	// s.sync;
+	// create the Dictionary
 	d = Dictionary.new;
 	d.add(\foldernames -> PathName("C:/Users/gabri/Desktop/live-coding/supercollider/samples").entries);
 	for (0, d[\foldernames].size-1,
@@ -40,14 +37,16 @@ s.waitForBoot({
 			Buffer.read(s,sf.fullPath);
 		});
 	)});
+	// creates the server to send OSC messages to the visuals
+	d.add(\visualServer -> NetAddr.new("localhost", 3002));
+	d.add(\sync -> { |command|
+		d[\visualServer].sendMsg("/visuals", command);
+	});
 	s.sync;
-	//proxy setup
-    // "C:/Users/gabri/Desktop/live-coding/supercollider/setup/Proxy.scd".load();
 	//loads synthdefs from setup folder
 	"C:/Users/gabri/Desktop/live-coding/supercollider/setup/SynthDefs.scd".load();
     //loads snippets from setup folder
 	//"C:/Users/gabri/Desktop/live-coding/supercollider/setup/Snippets.scd".load();
-	//wait, for the server to sync - Thanks Till Bovermann!
 	//activate StageLimiter - Part of the BatLib quark
 	StageLimiter.activate;
 	"Server setup done!".postln;

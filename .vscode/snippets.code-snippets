@@ -8,7 +8,7 @@
 	// Example:
 	"SimpleKick": {
         "scope": "supercollider",
-        "prefix": "kick",
+        "prefix": "k",
         "body": [
             "(",
             "~${1:k}[0] = Pbind(",
@@ -21,9 +21,9 @@
         ],
         "description": "Simple Kick"
     },
-	"SimpleHat": {
+	"SimpleOpenHiHat": {
         "scope": "supercollider",
-        "prefix": "hat",
+        "prefix": "oh",
         "body": [
             "(",
             "~${1:h}[0] = Pbind(",
@@ -34,14 +34,13 @@
             ");$0",
             ")"
         ],
-        "description": "Simple Hat"
+        "description": "Simple Closed HiHat"
     },
     "LpfSaw": {
         "scope": "supercollider",
         "prefix": "bpfsaw",
         "body": [
             "(",
-            "~${1:bpfsaw}.play; ~${1:bpfsaw}.awake_(false);",
             "~${1:bpfsaw} = {",
             "\tvar sig, env;",
             "\tenv = EnvGen.kr(Env([0,1,1,0],[\\atk.kr(2),\\sus.kr(0),\\rel.kr(3)],[\\c1.kr(1),0,\\c2.kr(-1)]),timeScale:\\ts.kr(1),doneAction:2);",

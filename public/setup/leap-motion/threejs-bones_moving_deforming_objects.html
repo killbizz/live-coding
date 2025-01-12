@@ -1,0 +1,275 @@
+<html>
+<head>
+  <title>Bone Hands - Leap</title>
+  <script src="http://localhost:3000/files/setup/leap-motion/leap-1.1.1.js"></script>
+  <script src="http://localhost:3000/files/setup/leap-motion/lib/leap-plugins-0.1.6.js"></script>
+  <!-- <script src="http://localhost:3000/files/setup/leap-motion/lib/three.js"></script> -->
+  <script src="https://unpkg.com/three@0.130.1/build/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.130.1/examples/js/controls/OrbitControls.min.js"></script>
+</head>
+<body>
+</body>
+
+<script>
+
+  var colors = [0xff0000, 0x00ff00, 0x0000ff];
+  var baseBoneRotation = (new THREE.Quaternion).setFromEuler(
+      new THREE.Euler(Math.PI / 2, 0, 0)
+  );
+  
+  var cubeSelected = false;
+  var cube = null;
+
+  var cubePhysicsBody = null;
+  var world = null;
+  var deformationRadius = 15;
+  var deformationStrength = 7;
+
+  var initPhysics = function() {
+    world = new CANNON.World();
+    // world.gravity.set(0, -9.82, 0);
+    world.gravity.set(0, 0, 0);
+    world.broadphase = new CANNON.NaiveBroadphase();
+  };
+
+  Leap.loop({background: true}, {
+    hand: function (hand) {
+
+      // Check for "closed fist" gesture (all fingers not extended)
+      var extendedFingers = hand.fingers.filter(function(finger) {
+        return finger.extended;
+      });
+
+      if (extendedFingers.length === 0) { // Closed fist detected
+        var handPos = new THREE.Vector3().fromArray(hand.palmPosition);
+
+        // console.log("close fist, position: " + handPos);
+
+        var cubePos = cube.position;
+        var distance = handPos.distanceTo(cubePos);
+
+        if (distance < 50) {
+          cubeSelected = true;
+        }
+      } else {
+        cubeSelected = false;
+      }
+
+      if (cubeSelected) {
+        cubePhysicsBody.position.set(hand.palmPosition[0], hand.palmPosition[1], hand.palmPosition[2]);
+      }
+
+      hand.fingers.forEach(function (finger) { 
+        if (finger.type === 1 && finger.extended) { // Only index finger
+            var fingerPos = new THREE.Vector3().fromArray(finger.tipPosition);
+            var cubeCenter = cube.position.clone();
+            var distanceToCube = fingerPos.distanceTo(cubeCenter);
+            console.log("Distance to cube: " + distanceToCube);
+            if (distanceToCube < 50) { // Check proximity to deform the cube surface
+                // Access the position attribute in BufferGeometry
+                var position = cube.geometry.attributes.position;
+                for (let i = 0; i < position.count; i++) {
+                    // Get each vertex position
+                    var vertex = new THREE.Vector3().fromBufferAttribute(position, i);
+                    var vertexPos = vertex.clone().applyMatrix4(cube.matrixWorld); // Get world position of vertex
+                    var distanceToFinger = vertexPos.distanceTo(fingerPos);
+                    console.log("Distance to finger: " + distanceToFinger);
+                    // Check if the vertex is within the deformation radius
+                    if (distanceToFinger < deformationRadius) {
+                        // Calculate deformation based on the distance to the finger
+                        var deformation = -deformationStrength * Math.exp(-Math.pow(distanceToFinger / deformationRadius, 2));
+                        // Apply deformation (change the vertex position along the z-axis)
+                        vertex.z += deformation;
+                        // Update the position attribute with the new vertex position
+                        position.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                    }
+                }
+                // Notify three.js that the geometry has been updated
+                position.needsUpdate = true;
+            }
+        }
+      });
+
+      hand.fingers.forEach(function (finger) {
+        finger.data('boneMeshes').forEach(function(mesh, i){
+          var bone = finger.bones[i];
+          mesh.position.fromArray(bone.center());
+          mesh.setRotationFromMatrix(
+            (new THREE.Matrix4).fromArray(bone.matrix())
+          );
+          mesh.quaternion.multiply(baseBoneRotation);
+        });
+        finger.data('jointMeshes').forEach(function(mesh, i){
+          var bone = finger.bones[i];
+          if (bone) {
+            mesh.position.fromArray(bone.prevJoint);
+          } else {
+            bone = finger.bones[i - 1];
+            mesh.position.fromArray(bone.nextJoint);
+          }
+        });
+      });
+
+      var armMesh = hand.data('armMesh');
+      armMesh.position.fromArray(hand.arm.center());
+      armMesh.setRotationFromMatrix(
+        (new THREE.Matrix4).fromArray(hand.arm.matrix())
+      );
+      armMesh.quaternion.multiply(baseBoneRotation);
+      armMesh.scale.x = hand.arm.width / 2;
+      armMesh.scale.z = hand.arm.width / 4;
+
+      renderer.render(scene, camera);
+
+    }
+  })
+  .use('handHold')
+  .use('handEntry')
+  .on('handFound', function(hand) {
+
+    hand.fingers.forEach(function (finger) {
+
+      var boneMeshes = [];
+      var jointMeshes = [];
+
+      finger.bones.forEach(function(bone) {
+        var boneMesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(5, 5, bone.length),
+            new THREE.MeshPhongMaterial()
+        );
+
+        boneMesh.material.color.setHex(0xffffff);
+        scene.add(boneMesh);
+        boneMeshes.push(boneMesh);
+      });
+
+      for (var i = 0; i < finger.bones.length + 1; i++) {
+        var jointMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(8),
+            new THREE.MeshPhongMaterial()
+        );
+
+        jointMesh.material.color.setHex(0x0088ce);
+        scene.add(jointMesh);
+        jointMeshes.push(jointMesh);
+      }
+
+      finger.data('boneMeshes', boneMeshes);
+      finger.data('jointMeshes', jointMeshes);
+
+    });
+
+    if (hand.arm) {
+      var armMesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(1, 1, hand.arm.length, 64),
+        new THREE.MeshPhongMaterial()
+      );
+
+      armMesh.material.color.setHex(0xffffff);
+      scene.add(armMesh);
+      hand.data('armMesh', armMesh);
+    }
+
+  })
+  .on('handLost', function(hand) {
+
+    hand.fingers.forEach(function (finger) {
+
+      var boneMeshes = finger.data('boneMeshes');
+      var jointMeshes = finger.data('jointMeshes');
+
+      boneMeshes.forEach(function(mesh) {
+        scene.remove(mesh);
+      });
+
+      jointMeshes.forEach(function(mesh) {
+        scene.remove(mesh);
+      });
+
+      finger.data({ boneMeshes: null, jointMeshes: null });
+
+    });
+
+    var armMesh = hand.data('armMesh');
+    scene.remove(armMesh);
+    hand.data('armMesh', null);
+
+    renderer.render(scene, camera);
+
+  })
+  .connect();
+
+  var initScene = function () {
+    window.scene = new THREE.Scene();
+    window.renderer = new THREE.WebGLRenderer({ alpha: true });
+    window.renderer.setClearColor(0x000000, 0);
+    window.renderer.setSize(window.innerWidth, window.innerHeight);
+    window.renderer.domElement.style.position = 'fixed';
+    window.renderer.domElement.style.top = 0;
+    window.renderer.domElement.style.left = 0;
+    window.renderer.domElement.style.width = '100%';
+    window.renderer.domElement.style.height = '100%';
+    document.body.appendChild(window.renderer.domElement);
+
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(0, 0.5, 1);
+    window.scene.add(directionalLight);
+
+    window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+    window.camera.position.fromArray([0, 100, 500]);
+    window.camera.lookAt(new THREE.Vector3(0, 160, 0));
+
+    window.addEventListener('resize', function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.render(scene, camera);
+    }, false);
+
+    scene.add(camera);
+
+    var geometry = new THREE.BoxGeometry(30, 45, 20);
+    var material = new THREE.MeshPhongMaterial({ color: 0x0000cc });
+    window.cube = new THREE.Mesh(geometry, material);
+    // cube.position.set(0, 200, 0);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
+    scene.add(cube);
+
+    var cubeShape = new CANNON.Box(new CANNON.Vec3(15, 22.5, 10)); 
+    cubePhysicsBody = new CANNON.Body({ mass: 1, material: new CANNON.Material({ friction: 0.4, restitution: 0.3 }) }); 
+    cubePhysicsBody.addShape(cubeShape); 
+    cubePhysicsBody.position.set(0, 100, 0);
+    world.addBody(cubePhysicsBody);
+
+    var axesHelper = new THREE.AxesHelper(100);
+    scene.add(axesHelper);
+
+    window.controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    controls.update();
+    renderer.render(scene, camera);
+  };
+
+  initPhysics();
+  initScene();
+
+  var animate = function () {
+    world.step(1/60); // Step the physics world
+    // Sync Cannon.js body position with Three.js mesh
+    cube.position.copy(cubePhysicsBody.position); 
+    cube.quaternion.copy(cubePhysicsBody.quaternion); 
+
+    renderer.render(scene, camera); 
+    requestAnimationFrame(animate); 
+  };
+
+  animate();
+
+</script>
+</html>
