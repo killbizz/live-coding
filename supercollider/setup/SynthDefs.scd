@@ -77,7 +77,6 @@ dur = release (usually not used, this is only really in case I accidentally play
 
 */
 
-// TODO: fix losing 1 instance evaluating a Pbind change in a NodeProxy
 SynthDef(\bplay, {
 	arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, pos = 0, dur = 15, gate = 1;
 	var sig, env;
