@@ -12,11 +12,17 @@
 Buffer.freeAll();
 Tdef.removeAll();
 ServerTree.removeAll();
-StageLimiter.deactivate;
+// StageLimiter.deactivate;
+// SuperDirt.start;
 
 // Routing audio to Reaper through CABLE (use ReaRoute to have more channels)
 // s.options.outDevice = "CABLE Input";
 // s.options.numOutputBusChannels = 8;
+// s.reboot { "Server rebooted with new settings.".postln; };
+
+// Routing audio to VoiceMeeter
+// s.options.outDevice = "VoiceMeeter Input";
+// s.options.numOutputBusChannels = 2;
 // s.reboot { "Server rebooted with new settings.".postln; };
 
 //increase number of buffers the server has access to for loading samples
@@ -48,9 +54,19 @@ s.waitForBoot({
     //loads snippets from setup folder
 	//"C:/Users/gabri/Desktop/live-coding/supercollider/setup/Snippets.scd".load();
 	//activate StageLimiter - Part of the BatLib quark
-	StageLimiter.activate;
+	// StageLimiter.activate;
 	"Server setup done!".postln;
-};
-);
+});
+
+// "Starting proxy setup".postln;
+// p = ProxySpace.push(s);
+// p.makeTempoClock;
+// // BPM -> beats / seconds
+// p.clock.tempo_(120/60);
+// // every change is active every new beat
+// p.quant_(1);
+// p.fadeTime = 0;
+
+// "Proxy setup done!".postln;
 
 )

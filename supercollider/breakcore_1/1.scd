@@ -1,69 +1,74 @@
-s.plotTree();
-SynthDescLib.global.browse();
-s.meter();
-s.scope(zoom: 0, bufsize: 8192 * 10);
-
-// working stereo abreaks
-    // abreak_170: 5
-    // abreak_180 : 1
-    // breaks175 : 1, 3, 4, 5, 6, 7, 8, 9, 10, 11
-// working mono abreaks
-    // breaks175 : 2
-
 p.clock.tempo_(175/60);
 
-(
-SynthDef(\simpleSine, {
-    |freq = 440, amp = 0.1|
-    var sig;
-    sig = SinOsc.ar(freq) * amp;
-    Out.ar(0, sig.dup); // send stereo output
-}).play();
-)
+s.plotTree();
+s.meter();
+
+// breaks175 : 1, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
 (
-~amen.release(0); ~amen.play(fadeTime: 0);
-~amen[0] = Pbind(
-    \instrument, \slice,
-    \buf, Pfunc{d["breaks175"][[1,3,4].choose]},
-    // \buf, d["abreak_180"][1],
-    \sliceNum, Pseq((0..15), inf),
-    // \sliceNum, Pseq([
-    //     Pseq([0,1,2,3]),
-    //     Pseq([4,5,6,7,7]),
-    //     Pseq([8,9,10,11]),
-    //     Pseq([12,13,14,3,3]),
-    // ], inf),
-    // \dur, Pseq([1,1,1,1,1,1,1,0.5, 0.5],inf),
-    \dur, 1,
-    \amp, 1,
-    \rate, 1
-);
+    ~amen.release(0); ~amen.play(fadeTime: 0);
+    ~amen[0] = Pbind(
+        \instrument, \slice,
+        \group, ~amen.group,
+        // \buf, Pfunc{d["breaks175"][[1,3,4].choose]},
+        // \buf, d["abreak_180"][1],
+        \buf, d["breaks175"][4],
+        \sliceNum, Pseq((0..15), inf),
+        // \sliceNum, Pseq([
+        //     Pseq([0,1,2,3]),
+        //     Pseq([4,5,6,7,7]),
+        //     Pseq([8,9,10,11]),
+        //     Pseq([12,13,14,3,3]),
+        // ], inf),
+        \dur, Pseq([1], inf),
+        \amp, 0.75,
+        \rate, 1,
+        \gate, 1
+    );
+    // ~amen.play(fadeTime: 0);
 )
 
-~amen[1] = \filter -> {|in| (in * 3).fold2(1)};
-~amen[2] = \filter -> {|in| CombL.ar(in, 5, 0.02, 3)};
+~amen[1] = \filter -> {|in| (in * 3.25).fold2(1) * 0.575};
 ~amen[1] = nil;
-~amen[3] = \filter -> {|in| GVerb.ar(in, 20)};
 
 ~amen.play(fadeTime: 0);
 ~amen.stop();
+
+~amen.end(0);
 ~amen.clear();
 
 (
-    ~k.release(0); ~k.play(fadeTime: 0);
+    ~bplay.release(0); ~bplay.play(fadeTime: 0);
+    ~bplay[0] = Pbind(
+        \instrument, \bplay,
+        \buf, d["breaks175"][1],
+        \dur, Pseq([1], inf),
+        \amp, 0.75,
+        \rate, 1,
+        \gate, 1
+    );
+    ~bplay.play(fadeTime: 0);
+)
+
+(
     ~k[0] = Pbind(
         \instrument,\bplay,
         \buf,d["k"][0],
         \dur,Pseq([
-            Pseq([1,1,1,1])
+            // Pseq([1, Rest(1), 1, 0.5, 0.5])
+            Pseq([1], inf)
             ],inf),
-        \amp, 1.25
+        \amp, 0.4
     );
+    ~k.play(fadeTime: 0);
 )
 
 ~k.play(fadeTime: 0);
 ~k.stop();
+~k.clear();
+// ~k.end(0);
+// ~k.free(0);
+// ~k = nil;
 
 (
     ~bpfbuf.release(0); ~bpfbuf.play(fadeTime: 0);

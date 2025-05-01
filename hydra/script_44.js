@@ -1,0 +1,27 @@
+solid()
+.colorama(({time}) => time * 0.0005 + a.fft[0] * 0.125)
+.layer(
+  shape(3, 0.3)
+    .rotate(Math.PI)
+    .scale(1, 0.9)
+    .scroll(0, 0.18)
+    .thresh().color(1,0,0)
+    .add(
+    shape(999, 0.25)
+    .scroll(-0.12, 0)
+    .thresh().color(1,0,0)
+    .add(
+      shape(999, 0.25)
+        .scroll(0.12, 0)
+        .thresh().color(1,0,0)
+      )
+  )
+  .rotate(Math.PI)
+  .scrollY(0.2)
+  .color(1, 0, 0)
+  .scrollX([0.8,0.2,0.6,1])
+  .scale([1,1.35,0.56,1.78])
+  .scale(0.1)
+  .luma(0.2, 0.01)
+)
+.out(o0);

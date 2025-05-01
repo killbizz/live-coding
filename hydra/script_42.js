@@ -2,10 +2,10 @@
 
 s0.initImage('local/files/images/michaux_untitled.jpg');
 
-a.setBins(3);
-a.setCutoff(9.1);
-a.setScale(2);
-a.setSmooth(0.65);
+// a.setBins(3);
+// a.setCutoff(9.1);
+// a.setScale(2);
+// a.setSmooth(0.65);
 
 src(s0)
 // .scrollX([0,0.2,0.8,1])

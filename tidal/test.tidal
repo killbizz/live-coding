@@ -1,0 +1,12 @@
+d1 $ sound "bd cp:1 bd cp:1"
+
+d2 $ sound "hh*4" |+| n "0.5"
+
+d2 silence
+
+d1 $ stack [
+    sound "bd ~ 808bd:0 ~",
+    sound "~ hh:1 ~ hh"
+]
+
+hush

@@ -103,10 +103,10 @@ gate = parameter to stop the envelope before its natural end, useful in NodeProx
 */
 
 SynthDef(\slice, {
-    arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, sliceNum = 0, gate = 1;
+    arg out = 0, buf = 0, rate = 1, amp = 0.5, pan = 0, sliceNum = 0, gate = 1, fadeTime = 0;
     var sig, env;
     sig = PlayBuf.ar(2, buf, BufRateScale.ir(buf) * rate, startPos: BufFrames.kr(buf) * sliceNum / 16);
-    env = EnvGen.ar(Env.linen(0.0, BufDur.kr(buf) / 16 / rate, 0.001), gate, doneAction: Done.freeSelf);
+    env = EnvGen.ar(Env.linen(fadeTime, BufDur.kr(buf) / 16 / rate, fadeTime), gate, doneAction: Done.freeSelf);
     sig = sig * env * amp;
 	Out.ar(out,Pan2.ar(sig,pan));
 }).add;
@@ -164,6 +164,33 @@ SynthDef(\bpfsaw, {
 	sig = Balance2.ar(sig[0],sig[1],pan);
 	sig = sig*env*amp;
 	Out.ar(out,sig);
+}).add;
+
+/*
+
+bpfbuf: an instrument by Eli Fieldsteel as part of his SuperCollider tutorial series
+A bandpass-filtered buffer player
+Has a lot of arguments,
+
+...
+
+*/
+
+SynthDef(\bpfbuf, {
+    arg atk=2, sus=0, rel=3, c1=1, c2=(-1), 
+        buf=0, rate=1, spos=0, freq=440, rq=1, bpfmix=0,
+        amp=1, pan=0, out=0, minRepeats=1, maxRepeats=4;
+    var sig, env, repeats, startPos, playBufs;
+    env = EnvGen.kr(Env([0,1,1,0],[atk,sus,rel],[c1,0,c2]),doneAction:2);
+    repeats = TRand.kr(minRepeats, maxRepeats, Impulse.kr(0));
+    startPos = Array.fill(8, { |i| spos * BufDur.kr(buf) });
+    playBufs = Mix.fill(8, { |i|
+        Select.ar(i < repeats, [PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, 1, startPos[i]), Silent.ar(2)])
+    });
+    sig = XFade2.ar(playBufs, BPF.ar(playBufs, freq, rq, 1/rq.sqrt), bpfmix * 2 - 1);
+    sig = sig * env;
+    sig = Pan2.ar(sig, pan, amp);
+    Out.ar(out, sig);
 }).add;
 
 "SynthDefs successfully loaded!".postln;
