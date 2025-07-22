@@ -1,0 +1,127 @@
+-- https://tidalcycles.org/docs/patternlib/tutorials/course1
+
+-- MINI-NOTATION
+-- https://tidalcycles.org/docs/reference/mini_notation#mini-notation-table
+
+-- console log tidal version
+tidal_version
+
+-- N PATTERNS, RESTS
+
+d1 $ sound "house:0 house:2 house:4 house:6 house:0 house:2 house:6 house:8"
+
+d1 $ n "0 2 4 6 0 2 6 8" # sound "house"
+
+d1 $ n "~ 2 4 6 ~ 2 6 8" # sound "house"
+
+d1 $ n "[0*3] 2 4 6 [0*3] 2 6 8" # sound "house"
+
+-- SUB-SEQUENCES, REPEATING, SPEEDING UP, AND SLOWING DOWN
+
+d1 $ sound "bd [hh hh hh]"
+
+d1 $ sound "bd [hh [hh hh] hh]"
+
+-- this
+d1 $ sound "bd hh!3"
+
+-- is equal of doing
+d1 $ sound "bd hh hh hh"
+
+-- this
+d1 $ sound "bd hh*3"
+
+-- is equal of doing
+d1 $ sound "bd [hh hh hh]"
+
+d1 $ sound "bd [hh*1.5]"
+
+d1 $ sound "bd [hh sd]*1.5"
+
+d1 $ sound "[bd hh:2 bd] [bd hh:0 bd hh:1]"
+
+d1 $ sound "bd sd/2"
+
+d1 $ sound "bd sd/3"
+
+d1 $ sound "bd [hh:0 hh:1 hh:2]/3"
+
+-- POLYPHONY
+
+d1 $ sound "[bd bd , ~ cp ~ cp]"
+
+-- [] = polyrythm - multiple rhythms happening within the same timeframe 
+-- => every sequence fits in the cycle
+d1 $ n "[0 1, 2 3 4]" # sound "alphabet"
+
+-- {} = polymetre - metres of different durations phase in and out of each other
+-- => the first sequence is fit in the cycle, the next one is aligned to the beat but not in the cycle
+d1 $ n "{0 1, 2 3 4}" # sound "alphabet"
+
+-- . = mark out regular rythmic patterns, breaking up a sentence in 2 parts of equal duration
+-- so this
+d1 $ sound "[bd sd bd sd] [hh*3]"
+
+-- is the same of
+d1 $ sound "bd sd bd sd . hh*3"
+
+-- ONE STEP PER CYCLE WITH "<>"
+
+-- this
+d1 $ sound "bd [hh:0 hh:1 hh:2]/3"
+
+-- is the same of doing
+d1 $ sound "bd <hh hh:1 hh:2>"
+
+-- CONTROL THE STEP LENGTH WITH "@"
+
+d1 $ sound "bd hh:2 hh:2@0.15 hh:2@0.15"
+
+-- EUCLIDEAN NOTATION
+-- The Euclidean Algorithm Generates Traditional Musical Rhythms by Toussaint
+d1 $ sound "bd(4,11)"
+
+-- use the draw function to console log the pattern
+draw "x(4,11)"
+
+-- the 3 param is like a step shift
+d1 $ sound "bd(4,11,3)"
+
+draw "x(4,11,2)"
+
+draw "x(4,11,3)"
+
+-- use the tidal operators to play with the euclidean algorithm
+d1 $ sound "bd(<2 3>, <16 8>)"
+
+draw "x(2,16)"
+
+draw "x(3,8)"
+
+d1 $ sound "cp([2 5], 8)"
+
+draw "x(2,8)"
+
+draw "x(5,8)"
+
+-- (2,5) : A thirteenth century Persian rhythm called Khafif-e-ramal.
+-- (3,4) : The archetypal pattern of the Cumbia from Colombia, as well as a Calypso rhythm from Trinidad.
+-- (3,5,2) : Another thirteenth century Persian rhythm by the name of Khafif-e-ramal, as well as a Rumanian folk-dance rhythm.
+-- (3,7) : A Ruchenitza rhythm used in a Bulgarian folk-dance.
+-- (3,8) : The Cuban tresillo pattern.
+-- (4,7) : Another Ruchenitza Bulgarian folk-dance rhythm.
+-- (4,9) : The Aksak rhythm of Turkey.
+-- (4,11) : The metric pattern used by Frank Zappa in his piece titled Outside Now.
+-- (5,6) : Yields the York-Samai pattern, a popular Arab rhythm.
+-- (5,7) : The Nawakhat pattern, another popular Arab rhythm.
+-- (5,8) : The Cuban cinquillo pattern.
+-- (5,9) : A popular Arab rhythm called Agsag-Samai.
+-- (5,11) : The metric pattern used by Moussorgsky in Pictures at an Exhibition.
+-- (5,12) : The Venda clapping pattern of a South African children’s song.
+-- (5,16) : The Bossa-Nova rhythm necklace of Brazil.
+-- (7,8) : A typical rhythm played on the Bendir (frame drum).
+-- (7,12) : A common West African bell pattern.
+-- (7,16,14) : A Samba rhythm necklace from Brazil.
+-- (9,16) : A rhythm necklace used in the Central African Republic.
+-- (11,24,14) : A rhythm necklace of the Aka Pygmies of Central Africa.
+-- (13,24,5) : Another rhythm necklace of the Aka Pygmies of the upper Sangha.

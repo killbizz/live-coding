@@ -1,0 +1,38 @@
+d1 $ s "house*4"
+  # squiz 1.5
+
+d1 silence
+
+d2 $ fast 2 $ n "<0 2> 3*2 4*3 <5 6 7>" # s "house <cpu mouth> cpu2"
+  # gain 0.85
+  -- # squiz 1
+  # speed (-2 + "<0 -1 4 7>")
+
+d2 silence
+
+d3 $ fast 1.25 $ n ("5 4 <~ 7> 5 0" |+ "7 0 26 0") # s "dsynth"
+  -- #speed "<3 1 2 5>"
+  -- #phasr 3
+  #pan rand
+  #gain 1.4
+  #attack 0.095 #release 0.05
+  -- #lpf "<250 450 1050 8000>" #lpq "<0.01 0.5 0.29>"
+  -- #distort 0.6
+  -- #scram 0.55
+  -- #legato 1.25
+  -- #tremr 12 #tremdp 1
+  -- #delay 1 #lock "1 0 0" #delayt "2 4 6" #delayfb 0.5
+  #dry 1.3 #room 2 #size 0.75
+  -- #freeze 0
+
+d4 $ n ("20 25 30" - 30) # s "superpiano"
+  #att 0.05 #rel 0.5
+  #distort 1
+
+setcps (150/60/4)
+
+xfade 4 $ s "arpy*4"
+
+xfadeIn 4 1 $ n "0 2 4" # s "cpu"
+
+xfadeIn 4 1 $ n "0 2 4" # s "cpu2"

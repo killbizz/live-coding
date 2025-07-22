@@ -1,0 +1,14 @@
+-- TESTS
+
+d1 $ sound "bd . [hh [hh*2]] . cp:2 . [hh hh [hh hh]] . bd . hh*2 . cp:2 . hh"
+
+d1 silence
+
+d2 $ stack [
+    sound "bd ~ 808bd:0 ~",
+    sound "~ hh:1 ~ hh:4"
+]
+
+d2 silence
+
+hush
